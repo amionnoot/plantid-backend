@@ -1,0 +1,9 @@
+services:
+  plantid:
+    build: .
+    container_name: plantid-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./images:/app/images
