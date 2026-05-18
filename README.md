@@ -88,5 +88,4 @@ Bei Verwendung bitte zitieren:
 ## Bekannte Limitierungen
 
 - Blühende Pflanzen werden schlechter erkannt als vegetative — Trainingsdaten enthalten überwiegend Blattstadien.
-- Sehr dichte Mischszenen liefern teilweise überlappende Detektionen.
 - Modell ist domain-spezifisch (europäische Ackerflächen).
