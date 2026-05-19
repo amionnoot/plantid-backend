@@ -25,8 +25,7 @@ model = YOLO(MODEL_PATH)
 
 
 def run_inference(image: np.ndarray):
-    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = model(rgb, conf=CONF_THRESHOLD, iou=IOU_THRESHOLD, imgsz=IMGSZ, verbose=False)[0]
+    results = model(image, conf=CONF_THRESHOLD, iou=IOU_THRESHOLD, imgsz=IMGSZ, verbose=False)[0]
 
     boxes = []
     for r in results.boxes:
