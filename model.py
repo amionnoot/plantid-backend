@@ -2,10 +2,10 @@
 
 Loads the fine-tuned model once at import time and exposes run_inference()
 which takes a BGR OpenCV image and returns the annotated image plus a list
-of detections.
+of detections. Uses Ultralytics' built-in annotator so the output looks
+identical to `yolo detect predict ...`.
 """
 
-import cv2
 import numpy as np
 from ultralytics import YOLO
 
@@ -13,13 +13,6 @@ MODEL_PATH = "weights/best.pt"
 CONF_THRESHOLD = 0.35
 IOU_THRESHOLD = 0.5
 IMGSZ = 640
-
-# BGR colors per class index (0 = crop, 1 = weed)
-CLASS_COLORS = {
-    0: (255, 100, 0),    # crop -> blue
-    1: (0, 200, 255),    # weed -> cyan/yellow
-}
-DEFAULT_COLOR = (0, 255, 0)
 
 model = YOLO(MODEL_PATH)
 
@@ -30,22 +23,14 @@ def run_inference(image: np.ndarray):
     boxes = []
     for r in results.boxes:
         x1, y1, x2, y2 = map(int, r.xyxy[0].tolist())
-        conf = float(r.conf[0])
-        cls = int(r.cls[0])
-        label = model.names[cls]
-        color = CLASS_COLORS.get(cls, DEFAULT_COLOR)
-
         boxes.append({
-            "label": label,
-            "confidence": round(conf, 3),
+            "label": model.names[int(r.cls[0])],
+            "confidence": round(float(r.conf[0]), 3),
             "box": [x1, y1, x2, y2],
         })
 
-        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
-        text = f"{label} {conf:.2f}"
-        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-        cv2.rectangle(image, (x1, y1 - th - 6), (x1 + tw + 4, y1), color, -1)
-        cv2.putText(image, text, (x1 + 2, y1 - 4),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+    # Ultralytics' built-in renderer: same visual style as `yolo detect predict`
+    # auto-scales line width and font size to image resolution.
+    annotated = results.plot(line_width=None, font_size=None, conf=True, labels=True)
 
-    return image, boxes
+    return annotated, boxes
